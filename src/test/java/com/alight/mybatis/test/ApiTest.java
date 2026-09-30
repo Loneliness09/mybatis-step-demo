@@ -1,26 +1,31 @@
 package com.alight.mybatis.test;
 
-import com.alight.mybatis.binding.MapperProxyFactory;
+import com.alight.mybatis.binding.MapperRegistry;
+import com.alight.mybatis.session.SqlSession;
+import com.alight.mybatis.session.SqlSessionFactory;
+import com.alight.mybatis.session.defaults.DefaultSqlSessionFactory;
+import com.alight.mybatis.test.dao.ISchoolDao;
 import com.alight.mybatis.test.dao.IUserDao;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 public class ApiTest {
 
     @Test
     public void test_MapperProxyFactory() {
-        MapperProxyFactory<IUserDao> factory = new MapperProxyFactory<>(IUserDao.class);
+        MapperRegistry registry = new MapperRegistry();
+        registry.addMappers("com.alight.mybatis.test.dao");
 
-        Map<String, String> sqlSessionMap = new HashMap<>();
-        sqlSessionMap.put("com.alight.mybatis.test.dao.IUserDao.queryUserName", "模拟执行:查询姓名");
-        sqlSessionMap.put("com.alight.mybatis.test.dao.IUserDao.queryUserAge", "模拟执行:查询年龄");
+        SqlSessionFactory sqlSessionFactory = new DefaultSqlSessionFactory(registry);
+        SqlSession sqlSession = sqlSessionFactory.openSession();
 
-        IUserDao userDao = factory.newInstance(sqlSessionMap);
+        IUserDao userDao = sqlSession.getMapper(IUserDao.class);
         String res = userDao.queryUserName("10001");
-        log.info("res={}", res);
+        log.info("userDao 测试结果: {}", res);
+
+        ISchoolDao schoolDao = sqlSession.getMapper(ISchoolDao.class);
+        log.info("schoolDao 测试结果: {}", schoolDao.querySchoolName("10001"));
     }
 }

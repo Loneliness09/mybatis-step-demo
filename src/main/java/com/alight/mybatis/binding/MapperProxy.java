@@ -1,18 +1,19 @@
 package com.alight.mybatis.binding;
 
 
+import com.alight.mybatis.session.SqlSession;
+
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.Map;
 
 public class MapperProxy<T> implements InvocationHandler, Serializable {
 
-    private Map<String, String> sqlSessionMap;
+    private final SqlSession sqlSession;
     private final Class<T> mapperInterface;
 
-    public MapperProxy(Map<String, String> sqlSessionMap, Class<T> mapperInterface) {
-        this.sqlSessionMap = sqlSessionMap;
+    public MapperProxy(SqlSession sqlSession, Class<T> mapperInterface) {
+        this.sqlSession = sqlSession;
         this.mapperInterface = mapperInterface;
     }
 
@@ -21,9 +22,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
         if (Object.class.equals(method.getDeclaringClass())) {
             return method.invoke(this, args);
         } else {
-            String key = mapperInterface.getName() + "." + method.getName();
-            System.out.println("查找的key = " + key);
-            return sqlSessionMap.get(key) + "被代理了.";
+            return sqlSession.selectOne(method.getName(), args);
         }
     }
 
