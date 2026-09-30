@@ -13,6 +13,7 @@ public class MapperProxyFactory<T> {
 
     public T newInstance(Map<String, String> sqlSessionMap) {
         final MapperProxy<T> mapperProxy = new MapperProxy<>(sqlSessionMap, mapperInterface);
+
         return (T) Proxy.newProxyInstance(
                 mapperInterface.getClassLoader(),
                 new Class[]{mapperInterface},
